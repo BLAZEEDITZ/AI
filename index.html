@@ -6,6 +6,11 @@
     <title>Blaze</title>
     <link rel="icon" type="image/x-icon" href="images/blaze-top.png">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Add highlight.js for code syntax highlighting -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/default.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-dark.min.css" id="code-theme-dark">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/styles/atom-one-light.min.css" id="code-theme-light">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.8.0/highlight.min.js"></script>
     <style>
         :root {
             --bg-color: #ffffff;
@@ -26,6 +31,13 @@
             --header-text: #343541;
             --scrollbar-thumb: #d9d9e3;
             --scrollbar-track: #f7f7f8;
+            --code-bg: #f7f7f8;
+            --code-border: #e5e5e5;
+            --code-text: #343541;
+            --code-block-bg: #f7f7f8;
+            --code-block-border: #e5e5e5;
+            --code-toolbar-bg: #e5e5e5;
+            --code-toolbar-text: #343541;
         }
 
         .dark-mode {
@@ -47,6 +59,13 @@
             --header-text: #ffffff;
             --scrollbar-thumb: #565869;
             --scrollbar-track: #40414f;
+            --code-bg: #2d2d39;
+            --code-border: #565869;
+            --code-text: #ffffff;
+            --code-block-bg: #2d2d39;
+            --code-block-border: #565869;
+            --code-toolbar-bg: #40414f;
+            --code-toolbar-text: #ffffff;
         }
 
         * {
@@ -103,32 +122,32 @@
         }
 
         .history-item {
-    display: flex;
-    align-items: center;
-    padding: 10px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-size: 14px;
-    color: rgba(255, 255, 255, 0.8);
-    transition: background-color 0.2s;
-    position: relative;
-}
+            display: flex;
+            align-items: center;
+            padding: 10px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
+            transition: background-color 0.2s;
+            position: relative;
+        }
 
-.history-item i.fa-comment {
-    margin-right: 12px;
-    flex-shrink: 0;
-}
+        .history-item i.fa-comment {
+            margin-right: 12px;
+            flex-shrink: 0;
+        }
 
-.history-item span {
-    flex: 1;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-}
+        .history-item span {
+            flex: 1;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
 
-.history-item:hover {
-    background-color: rgba(255, 255, 255, 0.1);
-}
+        .history-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
 
         .sidebar-footer {
             padding: 12px;
@@ -242,7 +261,7 @@
 
         .message-input {
             width: 100%;
-            padding: 12px 50px 12px 16px;
+            padding: 12px 90px 12px 16px;
             border: 1px solid var(--input-border);
             border-radius: 6px;
             background-color: var(--input-bg);
@@ -260,10 +279,15 @@
             border-color: #10a37f;
         }
 
-        .send-button {
+        .input-buttons {
             position: absolute;
             right: 10px;
             bottom: 10px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .send-button, .code-button {
             background: none;
             border: none;
             color: var(--button-text);
@@ -278,7 +302,7 @@
             transition: background-color 0.2s;
         }
 
-        .send-button:hover {
+        .send-button:hover, .code-button:hover {
             background-color: var(--button-hover);
         }
 
@@ -416,32 +440,246 @@
         }
 
         .delete-history-btn, .edit-history-btn {
-    background: none;
-    border: none;
-    color: rgba(255, 255, 255, 0.6);
-    cursor: pointer;
-    padding: 5px;
-    flex-shrink: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
+            background: none;
+            border: none;
+            color: rgba(255, 255, 255, 0.6);
+            cursor: pointer;
+            padding: 5px;
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
 
-.delete-history-btn {
-    margin-left: 5px;
-}
+        .delete-history-btn {
+            margin-left: 5px;
+        }
 
-.edit-history-btn {
-    margin-left: 5px;
-}
+        .edit-history-btn {
+            margin-left: 5px;
+        }
 
-.delete-history-btn:hover {
-    color: #ff5555;
-}
+        .delete-history-btn:hover {
+            color: #ff5555;
+        }
 
-.edit-history-btn:hover {
-    color: #55aaff;
-}
+        .edit-history-btn:hover {
+            color: #55aaff;
+        }
+
+        /* Code snippet styles */
+        .code-block-container {
+            position: relative;
+            margin: 15px 0;
+            border-radius: 8px;
+            overflow: hidden;
+            border: 1px solid var(--code-block-border);
+            background-color: var(--code-block-bg);
+        }
+
+        .code-toolbar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 8px 12px;
+            background-color: var(--code-toolbar-bg);
+            color: var(--code-toolbar-text);
+            font-size: 14px;
+        }
+
+        .code-language {
+            font-weight: 500;
+        }
+
+        .code-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .copy-code-btn {
+            background: none;
+            border: none;
+            color: var(--code-toolbar-text);
+            cursor: pointer;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+            padding: 4px 8px;
+            border-radius: 4px;
+            transition: background-color 0.2s;
+        }
+
+        .copy-code-btn:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .code-content {
+            padding: 12px;
+            overflow-x: auto;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+
+        pre {
+            margin: 0;
+            white-space: pre-wrap;
+        }
+
+        code {
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+
+        /* Code snippet modal */
+        .code-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .code-modal-content {
+            background-color: var(--bg-color);
+            border-radius: 8px;
+            width: 90%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.2);
+        }
+
+        .code-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 16px;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .code-modal-title {
+            font-size: 18px;
+            font-weight: 600;
+        }
+
+        .code-modal-close {
+            background: none;
+            border: none;
+            color: var(--text-color);
+            font-size: 20px;
+            cursor: pointer;
+        }
+
+        .code-modal-body {
+            padding: 16px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .code-form {
+            display: flex;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .form-label {
+            font-weight: 500;
+            font-size: 14px;
+        }
+
+        .form-select, .form-textarea {
+            padding: 10px;
+            border: 1px solid var(--input-border);
+            border-radius: 6px;
+            background-color: var(--input-bg);
+            color: var(--input-text);
+            font-size: 14px;
+        }
+
+        .form-textarea {
+            min-height: 200px;
+            resize: vertical;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+        }
+
+        .code-modal-footer {
+            display: flex;
+            justify-content: flex-end;
+            padding: 16px;
+            border-top: 1px solid var(--border-color);
+            gap: 12px;
+        }
+
+        .code-modal-btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 14px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .code-modal-cancel {
+            background-color: var(--button-bg);
+            color: var(--button-text);
+            border: 1px solid var(--border-color);
+        }
+
+        .code-modal-submit {
+            background-color: #10a37f;
+            color: white;
+            border: none;
+        }
+
+        .code-modal-cancel:hover {
+            background-color: var(--button-hover);
+        }
+
+        .code-modal-submit:hover {
+            background-color: #0d8c6d;
+        }
+
+        /* Inline code */
+        .inline-code {
+            background-color: var(--code-bg);
+            border: 1px solid var(--code-border);
+            border-radius: 4px;
+            padding: 2px 4px;
+            font-family: 'Menlo', 'Monaco', 'Courier New', monospace;
+            font-size: 0.9em;
+            color: var(--code-text);
+        }
+
+        /* Dark mode specific styles for code blocks */
+        .dark-mode #code-theme-light {
+            disabled: true;
+        }
+
+        .dark-mode #code-theme-dark {
+            disabled: false;
+        }
+
+        /* Light mode specific styles for code blocks */
+        #code-theme-dark {
+            disabled: true;
+        }
+
+        #code-theme-light {
+            disabled: false;
+        }
     </style>
 </head>
 <body>
@@ -575,9 +813,58 @@
         <div class="input-container">
             <div class="input-box">
                 <textarea class="message-input" id="message-input" placeholder="Send a message..." rows="1"></textarea>
-                <button class="send-button" id="send-button">
-                    <i class="fas fa-paper-plane"></i>
+                <div class="input-buttons">
+                    <button class="code-button" id="code-button" title="Request code snippet">
+                        <i class="fas fa-code"></i>
+                    </button>
+                    <button class="send-button" id="send-button">
+                        <i class="fas fa-paper-plane"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Code Snippet Modal -->
+    <div class="code-modal" id="code-modal">
+        <div class="code-modal-content">
+            <div class="code-modal-header">
+                <div class="code-modal-title">Request Code Snippet</div>
+                <button class="code-modal-close" id="code-modal-close">
+                    <i class="fas fa-times"></i>
                 </button>
+            </div>
+            <div class="code-modal-body">
+                <form class="code-form" id="code-form">
+                    <div class="form-group">
+                        <label class="form-label" for="code-language">Language</label>
+                        <select class="form-select" id="code-language">
+                            <option value="javascript">JavaScript</option>
+                            <option value="python">Python</option>
+                            <option value="java">Java</option>
+                            <option value="csharp">C#</option>
+                            <option value="cpp">C++</option>
+                            <option value="php">PHP</option>
+                            <option value="ruby">Ruby</option>
+                            <option value="swift">Swift</option>
+                            <option value="go">Go</option>
+                            <option value="rust">Rust</option>
+                            <option value="typescript">TypeScript</option>
+                            <option value="html">HTML</option>
+                            <option value="css">CSS</option>
+                            <option value="sql">SQL</option>
+                            <option value="bash">Bash</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label" for="code-description">What would you like to see?</label>
+                        <textarea class="form-textarea" id="code-description" placeholder="Describe the code you want to see..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="code-modal-footer">
+                <button class="code-modal-btn code-modal-cancel" id="code-modal-cancel">Cancel</button>
+                <button class="code-modal-btn code-modal-submit" id="code-modal-submit">Request Code</button>
             </div>
         </div>
     </div>
@@ -595,6 +882,14 @@
         const sendButton = document.getElementById('send-button');
         const newChatBtn = document.getElementById('new-chat-btn');
         const chatHistory = document.getElementById('chat-history');
+        const codeButton = document.getElementById('code-button');
+        const codeModal = document.getElementById('code-modal');
+        const codeModalClose = document.getElementById('code-modal-close');
+        const codeModalCancel = document.getElementById('code-modal-cancel');
+        const codeModalSubmit = document.getElementById('code-modal-submit');
+        const codeForm = document.getElementById('code-form');
+        const codeLanguage = document.getElementById('code-language');
+        const codeDescription = document.getElementById('code-description');
 
         // Check for saved theme preference or default to light
         const savedTheme = localStorage.getItem('theme') || 'light';
@@ -655,54 +950,54 @@
 
         // Render chat history in sidebar
         function renderChatHistory() {
-    chatHistory.innerHTML = '';
-    conversations.forEach(conversation => {
-        const historyItem = document.createElement('div');
-        historyItem.className = 'history-item';
-        
-        const icon = document.createElement('i');
-        icon.className = 'fas fa-comment';
-        
-        const span = document.createElement('span');
-        span.textContent = conversation.title || 'New conversation';
-        
-        const editBtn = document.createElement('button');
-        editBtn.className = 'edit-history-btn';
-        editBtn.setAttribute('data-id', conversation.id);
-        editBtn.innerHTML = '<i class="fas fa-pen"></i>';
-        
-        const deleteBtn = document.createElement('button');
-        deleteBtn.className = 'delete-history-btn';
-        deleteBtn.setAttribute('data-id', conversation.id);
-        deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
-        
-        historyItem.appendChild(icon);
-        historyItem.appendChild(span);
-        historyItem.appendChild(editBtn);
-        historyItem.appendChild(deleteBtn);
-        
-        // Add click event to the history item (excluding buttons)
-        span.addEventListener('click', () => {
-            loadConversation(conversation.id);
-        });
-        icon.addEventListener('click', () => {
-            loadConversation(conversation.id);
-        });
-        
-        // Add click events to buttons
-        editBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            editConversationTitle(conversation.id);
-        });
-        
-        deleteBtn.addEventListener('click', (e) => {
-            e.stopPropagation();
-            deleteConversation(conversation.id);
-        });
-        
-        chatHistory.appendChild(historyItem);
-    });
-}
+            chatHistory.innerHTML = '';
+            conversations.forEach(conversation => {
+                const historyItem = document.createElement('div');
+                historyItem.className = 'history-item';
+                
+                const icon = document.createElement('i');
+                icon.className = 'fas fa-comment';
+                
+                const span = document.createElement('span');
+                span.textContent = conversation.title || 'New conversation';
+                
+                const editBtn = document.createElement('button');
+                editBtn.className = 'edit-history-btn';
+                editBtn.setAttribute('data-id', conversation.id);
+                editBtn.innerHTML = '<i class="fas fa-pen"></i>';
+                
+                const deleteBtn = document.createElement('button');
+                deleteBtn.className = 'delete-history-btn';
+                deleteBtn.setAttribute('data-id', conversation.id);
+                deleteBtn.innerHTML = '<i class="fas fa-trash"></i>';
+                
+                historyItem.appendChild(icon);
+                historyItem.appendChild(span);
+                historyItem.appendChild(editBtn);
+                historyItem.appendChild(deleteBtn);
+                
+                // Add click event to the history item (excluding buttons)
+                span.addEventListener('click', () => {
+                    loadConversation(conversation.id);
+                });
+                icon.addEventListener('click', () => {
+                    loadConversation(conversation.id);
+                });
+                
+                // Add click events to buttons
+                editBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    editConversationTitle(conversation.id);
+                });
+                
+                deleteBtn.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    deleteConversation(conversation.id);
+                });
+                
+                chatHistory.appendChild(historyItem);
+            });
+        }
 
         // Load a conversation from history
         function loadConversation(id) {
@@ -759,6 +1054,11 @@
                 messageContainer.appendChild(messageElement);
             });
             scrollToBottom();
+            
+            // Apply syntax highlighting to code blocks
+            document.querySelectorAll('pre code').forEach((block) => {
+                hljs.highlightElement(block);
+            });
         }
 
         // Create a message element
@@ -772,12 +1072,77 @@
             
             const messageContent = document.createElement('div');
             messageContent.className = 'message-content';
-            messageContent.textContent = content;
+            
+            // Process content for code blocks
+            const processedContent = processMessageContent(content);
+            messageContent.innerHTML = processedContent;
             
             messageDiv.appendChild(avatar);
             messageDiv.appendChild(messageContent);
             
+            // Add event listeners to copy buttons
+            setTimeout(() => {
+                messageDiv.querySelectorAll('.copy-code-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const codeBlock = btn.closest('.code-block-container').querySelector('code');
+                        copyToClipboard(codeBlock.textContent);
+                        btn.innerHTML = '<i class="fas fa-check"></i> Copied!';
+                        setTimeout(() => {
+                            btn.innerHTML = '<i class="fas fa-copy"></i> Copy';
+                        }, 2000);
+                    });
+                });
+            }, 0);
+            
             return messageDiv;
+        }
+
+        // Process message content to detect and format code blocks
+        function processMessageContent(content) {
+            // Replace code blocks with formatted HTML
+            let processedContent = content.replace(/```(\w+)?\n([\s\S]*?)```/g, (match, language, code) => {
+                const lang = language || 'plaintext';
+                return `
+                <div class="code-block-container">
+                    <div class="code-toolbar">
+                        <div class="code-language">${lang}</div>
+                        <div class="code-actions">
+                            <button class="copy-code-btn">
+                                <i class="fas fa-copy"></i> Copy
+                            </button>
+                        </div>
+                    </div>
+                    <div class="code-content">
+                        <pre><code class="language-${lang}">${escapeHtml(code)}</code></pre>
+                    </div>
+                </div>
+                `;
+            });
+            
+            // Replace inline code with formatted HTML
+            processedContent = processedContent.replace(/`([^`]+)`/g, '<span class="inline-code">$1</span>');
+            
+            // Replace newlines with <br> tags
+            processedContent = processedContent.replace(/\n/g, '<br>');
+            
+            return processedContent;
+        }
+
+        // Escape HTML special characters
+        function escapeHtml(text) {
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        // Copy text to clipboard
+        function copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
         }
 
         // Add a typing indicator
@@ -916,6 +1281,30 @@
             }
         }
 
+        // Request code snippet
+        async function requestCodeSnippet() {
+            const language = codeLanguage.value;
+            const description = codeDescription.value.trim();
+            
+            if (!description) {
+                alert('Please describe the code you want to see.');
+                return;
+            }
+            
+            // Close the modal
+            codeModal.style.display = 'none';
+            
+            // Create the message
+            const message = `Generate a ${language} code snippet for: ${description}`;
+            messageInput.value = message;
+            
+            // Send the message
+            sendMessage();
+            
+            // Reset form
+            codeDescription.value = '';
+        }
+
         // Fetch response from API
         async function fetchResponse(userMessage) {
             try {
@@ -984,6 +1373,41 @@
         messageInput.addEventListener('input', autoResizeTextarea);
 
         newChatBtn.addEventListener('click', createNewConversation);
+
+        // Code snippet modal events
+        codeButton.addEventListener('click', () => {
+            codeModal.style.display = 'flex';
+        });
+
+        codeModalClose.addEventListener('click', () => {
+            codeModal.style.display = 'none';
+        });
+
+        codeModalCancel.addEventListener('click', () => {
+            codeModal.style.display = 'none';
+        });
+
+        codeModalSubmit.addEventListener('click', requestCodeSnippet);
+
+        codeForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            requestCodeSnippet();
+        });
+
+        // Close modal when clicking outside
+        window.addEventListener('click', (e) => {
+            if (e.target === codeModal) {
+                codeModal.style.display = 'none';
+            }
+        });
+
+        // Initialize highlight.js
+        document.addEventListener('DOMContentLoaded', () => {
+            hljs.configure({
+                languages: ['javascript', 'python', 'java', 'csharp', 'cpp', 'php', 'ruby', 'swift', 'go', 'rust', 'typescript', 'html', 'css', 'sql', 'bash']
+            });
+            hljs.highlightAll();
+        });
 
         // Initialize the application
         initializeUI();
